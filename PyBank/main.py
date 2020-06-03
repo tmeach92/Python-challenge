@@ -10,9 +10,7 @@ profit_loss = 0
 previous_month_profit_loss = 0
 current_month_profit_loss = 0
 change_profit_loss = 0
-total_profit_loss = 0
 months = []
-net_profit_loss = []
 changes_in_profit_loss = []
 
 #open csv
@@ -24,38 +22,51 @@ with open (Pybank_csv) as csvfile:
     
         #total number of months
         total_months = total_months + 1
-        months.append(row[0])
 
         #net total of "profit/losses"
-        net_profit_loss.append(row[1])
-        profit_loss = profit_loss + int(row[1])
+        current_month_profit_loss = int(row[1])
+        profit_loss += current_month_profit_loss
 
         #average of changes in "profit/losses"
-        current_month_profit_loss = int(row[1])
-        change_profit_loss = current_month_profit_loss - previous_month_profit_loss
+        if (total_months == 1):
+            previous_month_profit_loss = current_month_profit_loss
+            continue
+        else:
+            change_profit_loss = current_month_profit_loss - previous_month_profit_loss
+            months.append(row[0])
+            changes_in_profit_loss.append(change_profit_loss)
+            previous_month_profit_loss = current_month_profit_loss
 
-        changes_in_profit_loss.append(change_profit_loss)
+    #changes_in_profit_loss
+    sum_profit_loss = sum(changes_in_profit_loss)
+    change_profit_loss = round(sum_profit_loss/(total_months - 1), 2)
 
-        total_profit_loss = total_profit_loss + change_profit_loss
-        previous_month_profit_loss = current_month_profit_loss
+    #greatest increase in profits
+    greatest_increase_profits = max(changes_in_profit_loss)
+    greatest_decrease_profits = min(changes_in_profit_loss)
 
-        #changes_in_profit_loss
-        average_change_profits = (total_profit_loss/total_months)
+    increase_date = months[changes_in_profit_loss.index(greatest_increase_profits)]
+    decrease_date = months[changes_in_profit_loss.index(greatest_decrease_profits)]
 
-        #greatest increase in profits
-        greatest_increase_profits = max(changes_in_profit_loss)
-        greatest_decrease_profits = min(changes_in_profit_loss)
-
-        increase_date = months[changes_in_profit_loss.index(greatest_increase_profits)]
-        decrease_date = months[changes_in_profit_loss.index(greatest_decrease_profits)]
-
+    #print to terminal
     print("Financial Analysis")
     print("---------------------------------------------")
     print("Total Months: " + str(total_months))
     print("Total Profits: " + "$" + str(profit_loss))
-    print("Average Change: " + "$" + str(int(average_change_profits)))
+    print("Average Change: " + "$" + str(change_profit_loss))
     print("Greatest Increase in Profits: " + str(increase_date) + " ($" + str(greatest_increase_profits) + ")")
     print("Greatest Decrease in Profits: " + str(decrease_date) + " ($" + str(greatest_decrease_profits)+ ")")
 
+    #export as .txt file
+    financialanalysis = os.path.join("Analysis", "financialanalysis.txt")
+    with open(financialanalysis, "w") as text:
+        text.write("Financial Analysis")
+        text.write("---------------------------------------------")
+        text.write("Total Months: " + str(total_months))
+        text.write("Total Profits: " + "$" + str(profit_loss))
+        text.write("Average Change: " + "$" + str(change_profit_loss))
+        text.write("Greatest Increase in Profits: " + str(increase_date) + " ($" + str(greatest_increase_profits) + ")")
+        text.write("Greatest Decrease in Profits: " + str(decrease_date) + " ($" + str(greatest_decrease_profits)+ ")")
+        
 
 
